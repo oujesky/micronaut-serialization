@@ -110,7 +110,7 @@ class ServerAuthentication implements Authentication {
 
     void "test json serialize/deserialize as different impl overridden on field"() {
         given:
-        def context = buildContext("""
+        def context = buildContext('test.Test', """
 package test;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
