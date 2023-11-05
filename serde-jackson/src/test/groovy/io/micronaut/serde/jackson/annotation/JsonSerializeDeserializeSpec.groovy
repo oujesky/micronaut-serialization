@@ -107,4 +107,97 @@ class ServerAuthentication implements Authentication {
         cleanup:
         context.close()
     }
+
+    void "test json serialize/deserialize as different impl overridden on field"() {
+        given:
+        def context = buildContext("""
+package test;
+
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import io.micronaut.serde.annotation.Serdeable;
+
+import java.util.List;
+import java.util.LinkedList;
+
+@JsonSerialize(as = DefaultTestImpl.class)
+@JsonDeserialize(as = DefaultTestImpl.class)
+interface TestInterface {
+    String getValue();
+}
+
+@Serdeable
+class DefaultTestImpl implements TestInterface {
+    private final String value;
+    DefaultTestImpl(String value) {
+        this.value = value;
+    }
+
+    @Override
+    public String getValue() {
+        return value;
+    }
+}
+
+@Serdeable
+class CustomTestImpl implements TestInterface {
+    private final String value;
+    CustomTestImpl(String value) {
+        this.value = value;
+    }
+
+    @Override
+    public String getValue() {
+        return value;
+    }
+
+    public boolean isCustom() {
+        return true;
+    }
+}
+
+@Serdeable
+class Test {
+
+    @JsonSerialize(as = CustomTestImpl.class)
+    @JsonDeserialize(as = CustomTestImpl.class)
+    private final TestInterface object;
+
+    @JsonDeserialize(as = LinkedList.class)
+    private final List<Integer> list;
+
+
+    public Test(TestInterface object, List<Integer> list) {
+        this.object = object;
+        this.list = list;
+    }
+
+    public TestInterface getObject() {
+        return object;
+    }
+
+    public List<Integer> getList() {
+        return list;
+    }
+}
+""")
+        when:
+        def result = jsonMapper.readValue('{"object":{"value":"test"},"list":[1,2,3]}', typeUnderTest)
+
+        then:
+        result.object.getClass().name == 'test.CustomTestImpl'
+        result.object.value == "test"
+
+        result.list == [1, 2, 3]
+        result.list.getClass().name == 'java.util.LinkedList'
+
+        when:
+        def json = writeJson(jsonMapper, result)
+
+        then:
+        json == '{"object":{"value":"test","custom":true},"list":[1,2,3]}'
+
+        cleanup:
+        context.close()
+    }
 }

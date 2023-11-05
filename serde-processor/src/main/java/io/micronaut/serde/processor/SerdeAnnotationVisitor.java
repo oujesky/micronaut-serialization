@@ -164,6 +164,9 @@ public class SerdeAnnotationVisitor implements TypeElementVisitor<SerdeConfig, S
                     this.jsonValueField = element;
                 }
             }
+
+            handleSerializeAs(element, context, element.getType());
+            handleDeserializeAs(element, context, element.getType());
         }
     }
 
@@ -791,24 +794,11 @@ public class SerdeAnnotationVisitor implements TypeElementVisitor<SerdeConfig, S
                 });
             }
 
-            String serializeAs = element.getDeclaredMetadata().stringValue(SerdeConfig.class, SerdeConfig.SERIALIZE_AS).orElse(null);
-            if (serializeAs != null) {
-                ClassElement thatType = context.getClassElement(serializeAs).orElse(null);
-                if (thatType != null && !thatType.isAssignable(element)) {
-                    context.fail("Type to serialize as [" + serializeAs + "], must be a subtype of the annotated type: " + element.getName(),
-                                 element);
-                    return;
-                }
+            if (handleSerializeAs(element, context, element)) {
+                return;
             }
-
-            String deserializeAs = element.getDeclaredMetadata().stringValue(SerdeConfig.class, SerdeConfig.DESERIALIZE_AS).orElse(null);
-            if (deserializeAs != null) {
-                ClassElement thatType = context.getClassElement(deserializeAs).orElse(null);
-                if (thatType != null && !thatType.isAssignable(element)) {
-                    context.fail("Type to deserialize as [" + deserializeAs + "], must be a subtype of the annotated type: " + element.getName(),
-                                 element);
-                    return;
-                }
+            if (handleDeserializeAs(element, context, element)) {
+                return;
             }
 
             final MethodElement primaryConstructor = element.getPrimaryConstructor().orElse(null);
@@ -872,6 +862,32 @@ public class SerdeAnnotationVisitor implements TypeElementVisitor<SerdeConfig, S
                     propertyNamingStrategy
             );
         }
+    }
+
+    private boolean handleDeserializeAs(Element element, VisitorContext context, ClassElement type) {
+        String deserializeAs = element.getDeclaredMetadata().stringValue(SerdeConfig.class, SerdeConfig.DESERIALIZE_AS).orElse(null);
+        if (deserializeAs != null) {
+            ClassElement thatType = context.getClassElement(deserializeAs).orElse(null);
+            if (thatType != null && !thatType.isAssignable(type)) {
+                context.fail("Type to deserialize as [" + deserializeAs + "], must be a subtype of the annotated type: " + element.getName(),
+                    element);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean handleSerializeAs(Element element, VisitorContext context, ClassElement type) {
+        String serializeAs = element.getDeclaredMetadata().stringValue(SerdeConfig.class, SerdeConfig.SERIALIZE_AS).orElse(null);
+        if (serializeAs != null) {
+            ClassElement thatType = context.getClassElement(serializeAs).orElse(null);
+            if (thatType != null && !thatType.isAssignable(type)) {
+                context.fail("Type to serialize as [" + serializeAs + "], must be a subtype of the annotated type: " + element.getName(),
+                    element);
+                return true;
+            }
+        }
+        return false;
     }
 
     private void handleClassImport(VisitorContext context, AnnotationValue<SerdeImport> value, ClassElement c, List<AnnotationClassValue<?>> classValues) {

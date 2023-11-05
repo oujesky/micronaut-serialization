@@ -173,7 +173,7 @@ final class SpecificObjectDeserializer implements Deserializer<Object>, Updating
             return derProperty.deserializer.deserializeNullable(
                 objectDecoder,
                 decoderContext,
-                derProperty.argument
+                derProperty.deserializeAs
             );
         } catch (InvalidFormatException e) {
             throw new InvalidPropertyFormatException(e, derProperty.argument);
@@ -191,7 +191,7 @@ final class SpecificObjectDeserializer implements Deserializer<Object>, Updating
             return derProperty.deserializer.deserializeNullable(
                 objectDecoder,
                 decoderContext,
-                derProperty.argument
+                derProperty.deserializeAs
             );
         } catch (InvalidFormatException e) {
             throw new InvalidPropertyFormatException(e, derProperty.argument);
@@ -682,7 +682,7 @@ final class SpecificObjectDeserializer implements Deserializer<Object>, Updating
 
         private UnwrappedPropertyDeserializer(DeserBean.DerProperty<Object, Object> unwrappedProperty, Conf conf) {
             this.wrappedProperty = unwrappedProperty;
-            this.beanDeserializer = newBeanDeserializer(null, unwrappedProperty.unwrapped, conf, true, unwrappedProperty.argument);
+            this.beanDeserializer = newBeanDeserializer(null, unwrappedProperty.unwrapped, conf, true, unwrappedProperty.deserializeAs);
         }
 
         boolean tryConsume(String propertyName, Decoder decoder, DecoderContext decoderContext) throws IOException {

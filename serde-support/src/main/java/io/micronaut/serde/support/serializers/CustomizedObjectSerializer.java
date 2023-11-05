@@ -145,7 +145,7 @@ final class CustomizedObjectSerializer<T> implements ObjectSerializer<T> {
             try {
                 if (property.serializableInto) {
                     if (property.objectSerializer != null) {
-                        property.objectSerializer.serializeInto(objectEncoder, context, property.argument, propertyValue);
+                        property.objectSerializer.serializeInto(objectEncoder, context, property.serializeAs, propertyValue);
                     } else {
                         throw new SerdeException("Serializer for a property: " + property.name + " doesn't support serializing into an existing object");
                     }
@@ -154,7 +154,7 @@ final class CustomizedObjectSerializer<T> implements ObjectSerializer<T> {
                     if (propertyValue == null) {
                         objectEncoder.encodeNull();
                     } else {
-                        serializer.serialize(objectEncoder, context, property.argument, propertyValue);
+                        serializer.serialize(objectEncoder, context, property.serializeAs, propertyValue);
                     }
                 }
             } finally {

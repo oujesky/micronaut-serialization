@@ -54,7 +54,7 @@ final class SimpleObjectSerializer<T> implements ObjectSerializer<T> {
                     if (v == null) {
                         childEncoder.encodeNull();
                     } else {
-                        property.serializer.serialize(childEncoder, context, property.argument, v);
+                        property.serializer.serialize(childEncoder, context, property.serializeAs, v);
                     }
                 }
                 childEncoder.finishStructure();
@@ -74,7 +74,7 @@ final class SimpleObjectSerializer<T> implements ObjectSerializer<T> {
             if (v == null) {
                 encoder.encodeNull();
             } else {
-                property.serializer.serialize(encoder, context, property.argument, v);
+                property.serializer.serialize(encoder, context, property.serializeAs, v);
             }
         }
     }
