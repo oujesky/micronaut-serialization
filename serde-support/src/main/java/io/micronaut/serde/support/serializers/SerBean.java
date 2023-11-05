@@ -339,7 +339,7 @@ final class SerBean<T> {
         if (customSer != null) {
             serializer = encoderContext.findCustomSerializer(customSer);
         } else {
-            serializer = (Serializer<Z>) encoderContext.findSerializer(prop.argument);
+            serializer = (Serializer<Z>) encoderContext.findSerializer(prop.serializeAs);
         }
 
         if (prop.serializableInto) {
@@ -358,7 +358,7 @@ final class SerBean<T> {
                 if (prefix != null || suffix != null) {
                     throw new SerdeException("Serializer for a property: " + prop.name + " is expected to be the default object serializer to support custom prefix/suffix");
                 }
-                prop.serializer = serializer.createSpecific(encoderContext, prop.argument);
+                prop.serializer = serializer.createSpecific(encoderContext, prop.serializeAs);
                 if (prop.serializer instanceof io.micronaut.serde.ObjectSerializer<Z> objectSerializer) {
                     prop.objectSerializer = objectSerializer;
                 } else {
@@ -366,7 +366,7 @@ final class SerBean<T> {
                 }
             }
         } else {
-            prop.serializer = serializer.createSpecific(encoderContext, prop.argument);
+            prop.serializer = serializer.createSpecific(encoderContext, prop.serializeAs);
         }
 
         prop.annotationMetadata = null;
@@ -514,6 +514,7 @@ final class SerBean<T> {
         // CHECKSTYLE:OFF
         public final String name;
         public final Argument<P> argument;
+        public final Argument<P> serializeAs;
         public final Class<?>[] views;
         public final String managedRef;
         public final String backRef;
@@ -552,6 +553,7 @@ final class SerBean<T> {
             this.backRef = annotationMetadata.stringValue(SerdeConfig.SerBackRef.class)
                     .orElse(null);
             this.annotationMetadata = annotationMetadata;
+            this.serializeAs = SerdeAnnotationUtil.resolveArgument(argument, annotationMetadata, SerdeConfig.SERIALIZE_AS);
             this.serializableInto = annotationMetadata.hasAnnotation(SerdeConfig.SerUnwrapped.class) || annotationMetadata.hasAnnotation(SerdeConfig.SerAnyGetter.class);
         }
 

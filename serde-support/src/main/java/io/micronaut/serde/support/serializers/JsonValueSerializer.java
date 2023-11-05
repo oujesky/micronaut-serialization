@@ -44,7 +44,7 @@ final class JsonValueSerializer<T> implements ObjectSerializer<T> {
         jsonValue.serializer.serialize(
             encoder,
             context,
-            jsonValue.argument,
+            jsonValue.serializeAs,
             jsonValue.get(value)
         );
     }

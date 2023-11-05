@@ -59,7 +59,7 @@ final class DelegatingObjectDeserializer implements Deserializer<Object> {
                 result = deserializer.deserializeNullable(
                     decoder,
                     decoderContext,
-                    creator.argument
+                    creator.deserializeAs
                 );
             } catch (InvalidFormatException e) {
                 throw new InvalidPropertyFormatException(e, creator.argument);
